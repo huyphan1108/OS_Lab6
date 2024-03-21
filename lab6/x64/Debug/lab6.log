@@ -1,0 +1,8 @@
+﻿  parser.c
+C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\parser.c(44,27): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
+C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\parser.c(44,27): warning C4024: 'memset': different types for formal and actual parameter 2
+C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\parser.c(45,25): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
+C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\parser.c(45,25): warning C4024: 'memset': different types for formal and actual parameter 2
+C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\parser.c(64,32): warning C4047: '!=': 'int' differs in levels of indirection from 'void *'
+C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\parser.c(273,31): warning C4047: '!=': 'int' differs in levels of indirection from 'void *'
+  lab6.vcxproj -> C:\Users\huyph\OneDrive\Desktop\Operating System\OS_Lab6\lab6\x64\Debug\lab6.exe
