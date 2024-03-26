@@ -237,11 +237,24 @@ int main()
 			}
 			*/
 			else if (strcmp(tokenizedLine[2], "terminated") == 0) {
+				int index;
 				for (int a = 0; a < n; a++) {
 					if (strcmp(tokenizedLine[0], processes[a].id) == 0) {
 						strcpy(processes[a].state, "Exit*");
+						index = a;
 					}
 				}
+
+				n--;
+				user_process = n * user_threshold / 100;  //update the process threshold
+
+
+				rand_process_swap = rand() % 20;
+				while (strcmp(processes[rand_process_swap].state, "Blocked/Suspend") != 0) {
+					rand_process_swap = rand() % 20;
+				}
+				strcpy(processes[rand_process_swap].state, "Blocked*");
+				overall_latency++;
 			}
 			/// TODO: Interrupt
 			else if (strcmp(tokenizedLine[1], "interrupt") == 0) {
@@ -368,7 +381,10 @@ int main()
 				processes[a].state[temp_size - 1] = '\0';
 			}
 		}
-		fprintf(fp2, "\nDisk queue: %s\n", disk_q);
+		fprintf(fp2, "\nTotal number of process: %d\n", n);
+		fprintf(fp2, "Number of blocked process: %d\n", blocked_count);
+		fprintf(fp2, "Process threshold: %d\n", user_process);
+		fprintf(fp2, "Disk queue: %s\n", disk_q);
 		fprintf(fp2, "Printer queue: %s\n", printer_q);
 		fprintf(fp2, "Keyboard queue: %s\n", kb_q);
 
@@ -410,7 +426,10 @@ int main()
 					processes[a].state[temp_size - 1] = '\0';
 				}
 			}
-			fprintf(fp2, "\nDisk queue: %s\n", disk_q);
+			fprintf(fp2, "\nTotal number of process: %d\n", n);
+			fprintf(fp2, "Number of blocked process: %d\n", blocked_count);
+			fprintf(fp2, "Process threshold: %d\n", user_process);
+			fprintf(fp2, "Disk queue: %s\n", disk_q);
 			fprintf(fp2, "Printer queue: %s\n", printer_q);
 			fprintf(fp2, "Keyboard queue: %s\n", kb_q);
 
@@ -422,6 +441,8 @@ int main()
 	printf("Parsing complete\n\n");
 	fclose(fp1);
 	fclose(fp2);
+
+	printf("The overall latency for this trial is %d\n", overall_latency);
 
 	return 0;
 }
