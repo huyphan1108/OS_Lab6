@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="inp1.txt" />
+    <Text Include="inp1_parsed.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

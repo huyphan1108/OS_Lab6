@@ -1,11 +1,31 @@
-// Santino Nardolillo
-// Quang Vu
-// Joey Daermann
 #define _CRT_SECURE_NO_DEPRECATE
-//parses the input file into Process and event
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#include<time.h>
+//#include <sys/time.h>
+
+typedef struct {
+	char id[20];
+	char state[20];
+	char queue[20];
+} Process;
+
+//Derek
+char temp_arr[20][5];
+void parse_queue(char* queue) {
+	//printf("%s\n", pid);
+	//printf("%s\n", queue);
+	char* d_token = strtok(queue, " ");
+
+	for (int a = 0; d_token != NULL; a++) {
+		//printf("%s ", d_token);
+		strcpy(temp_arr[a], d_token);
+		d_token = strtok(NULL, " ");
+	}
+}
+
+
 
 int main()
 {
@@ -13,68 +33,102 @@ int main()
 	char* rch;
 	char str[200];
 	char LineInFile[40][300];
-	char ProcessState[40][20];
-	char PrintState[40][20];
 	int lineP, lineQ;
 	char* sch;
 	char tokenizedLine[10][10];
+	int blocked_count = 0;
+	int user_threshold, user_cap, user_process;
+	int rand_process_swap = 0;
+	int overall_latency = 0;
+
 
 	FILE* fp1;
 	FILE* fp2;
 	fp1 = fopen("inp1.txt", "r");			//open the original input file
-	fp2 = fopen("inp1parsed.txt", "w");	//output the Process ID and event to another file. 
+	fp2 = fopen("inp1_parsed.txt", "w");	//output the Process ID and event to another file. 
 	//You can store in variables instead of printing to file
+
+	srand(time(NULL));  // Random num seed
+	Process processes[20];
+
+	char* printer_q = (char*)malloc(10 * sizeof(char));
+	char* disk_q = (char*)malloc(10 * sizeof(char));
+	char* kb_q = (char*)malloc(10 * sizeof(char));
+
+	strcpy(disk_q, "");						// initialize memory location for queues
+	strcpy(printer_q, "");
+	strcpy(kb_q, "");
+
+
+	printf("Started parsing...\n");
+
+	//get the first line
+	if (fgets(str, sizeof(str), fp1) != NULL) {
+		//Remove the 'end' and print into write file
+		char character = ' ';
+		char* ptr = strrchr(str, character);
+		*ptr = '\0';
+		fprintf(fp2, "%s\n\n", str);
+	}
+
+	//get the initial process ID and its state from the first line
+	char* token = strtok(str, " ");
+	int j = 0;
+	while (token != NULL && j < 20) {
+		if (j % 2 == 0) {
+			//processes[i / 2].id = atoi(token);
+			strcpy(processes[j / 2].id, token);
+		}
+		else {
+			strcpy(processes[j / 2].state, token);
+		}
+		token = strtok(NULL, " ");
+		j++;
+	}
+
+	//printf("%d ", j / 2);
+	for (int a = 0; a < j / 2; a++) {
+		strcpy(processes[a].queue, "");
+	}
+
+	/*
+	for (int z = 0; z < j / 2; z++) {
+		fprintf(fp2, "Process %d: id = %s, state = %s\n", j, processes[z].id, processes[z].state);
+	}
+	*/
+	for (int a = 0; a < j / 2; a++) {
+		if (strcmp(processes[a].state, "Blocked") == 0) {
+			blocked_count++;
+		}
+	}
+	//printf("Number of blocked processes is: %d\n", blocked_count);
+	printf("Choose percentage of Processes in Blocked state (80, 90 or 100): ");
+	scanf("%d", &user_threshold);
+	//printf("User chose: %d", user_threshold);
+	while (user_threshold != 80 && user_threshold != 90 && user_threshold != 100) {
+		printf("Please choose 80, 90 or 100 for percentage value: ");
+		scanf("%d", &user_threshold);
+	}
+
+	printf("Choose the swapping capacity (1 or 2): ");
+	scanf("%d", &user_cap);
+	while (user_cap != 1 && user_cap != 2) {
+		printf("Please choose 1 or 2 for swapping capacity: ");
+		scanf("%d", &user_cap);
+	}
+
+	int n = j / 2; // n is total number of process
+	//printf("Total number of process is: %d\n", n);
+
+	user_process = n * user_threshold / 100;
+	//printf("Number of user process is: %d\n", user_process);
 
 	lineP = 0;
 	i = 0;
 
-	// creating character arrays
-	char DiskArr[20][10];
-	char PrinterArr[20][10];
-	char KeyboardArr[20][10];
 
-	for (int j = 0; j < 20; j++)
-	{
-		strcpy(DiskArr[j], "0");
-		strcpy(PrinterArr[j], "0");
-		strcpy(KeyboardArr[j], "0");
-	}
-	for (int j = 0; j < 40; j++)
-	{
-		memset(ProcessState[j], NULL, 20);
-		memset(PrintState[j], NULL, 20);
-	}
-
-	printf("Started parsing...\n");
-
-	//copy first line of the original file to the new filefile
-	if (fgets(str, sizeof(str), fp1) != NULL)
+	while (fgets(str, sizeof(str), fp1) != NULL) {
 		fprintf(fp2, "%s", str);
-
-	int j = 0;
-	rch = strtok(str, " ");
-	while (strcmp(rch, "end\n") != 0)
-	{
-		strcpy(ProcessState[j], rch);
-		j++;
-		rch = strtok(NULL, " ");
-	}
-	int tempi = 0;
-	printf("Initial States: ");
-	for (; ProcessState[tempi][1] != NULL && tempi < 40;)
-	{
-		printf("%s ", ProcessState[tempi]);
-		tempi++;
-	}
-	printf("\n\n");
-
-	//parse each remaining line into Process event
-	//while loop with fgets reads each line
-	while (fgets(str, sizeof(str), fp1) != NULL)
-	{
-		printf("% s\n", str);
-		for (int j = 0; j < 40; j++)
-			strcpy(PrintState[j], ProcessState[j]);
 		lineP = 0;
 		rch = strtok(str, ":;.");					// use strtok to break up the line by : or . or ; This would separate each line into the different events
 		while (rch != NULL)
@@ -83,9 +137,6 @@ int main()
 			lineP++;								//keep track of how many events are in that line
 			rch = strtok(NULL, ":;.");				//needed for strtok to continue in the while loop
 		}
-
-
-		//for each event (e.g. Time slice for P7 expires) pull out process number and event
 		for (i = 1; i < lineP - 1; i++)
 		{
 			lineQ = 0;
@@ -100,207 +151,275 @@ int main()
 			//tokenizedLine has the event separated by spaces (e.g. Time slice for P7 expires)
 			if (strcmp(tokenizedLine[1], "requests") == 0)						//Process requests an I/O device
 			{
-
-				//fprintf(fp2, "%s %s ", tokenizedLine[0], tokenizedLine[1]);
-				fprintf(fp2, "%s %s %s ", tokenizedLine[0], tokenizedLine[1], tokenizedLine[3]);
-
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[0]) == 0)
-					{
-						strcpy(ProcessState[j + 1], "Blocked");
-						strcpy(PrintState[j + 1], "Blocked*");
-						if (strcmp(tokenizedLine[3], "disk") == 0)
-						{
-							for (int j = 0; j < 20; j++)
-								if (strcmp(DiskArr[j], "0") == 0)
-								{
-									strcpy(DiskArr[j], tokenizedLine[0]);
-									break;
-								}
+				//fprintf(fp2, "%s %s \n", tokenizedLine[0], tokenizedLine[1]);
+				//fprintf(fp2, "%s %s %s ", tokenizedLine[0], tokenizedLine[1], tokenizedLine[3]);
+				for (int a = 0; a < n; a++) {
+					if ((strcmp(tokenizedLine[0], processes[a].id) == 0) && (strcmp(tokenizedLine[3], "disk") == 0)) {
+						strcpy(processes[a].state, "Blocked*");
+						strcpy(processes[a].queue, "disk");
+						if (strcmp(disk_q, "") == 0) {
+							strcpy(disk_q, tokenizedLine[0]);
 						}
-						else if (strcmp(tokenizedLine[3], "printer") == 0)
-						{
-							for (int j = 0; j < 20; j++)
-								if (strcmp(PrinterArr[j], "0") == 0)
-								{
-									strcpy(PrinterArr[j], tokenizedLine[0]);
-									break;
-								}
+						else {
+							strcat(disk_q, " ");
+							strcat(disk_q, tokenizedLine[0]);
 						}
-						else if (strcmp(tokenizedLine[3], "keyboard") == 0)
-						{
-							for (int j = 0; j < 20; j++)
-								if (strcmp(KeyboardArr[j], "0") == 0)
-								{
-									strcpy(KeyboardArr[j], tokenizedLine[0]);
-									break;
-								}
+						//fprintf(fp2, "%s ", processes[a].state);
+					}
+					else if ((strcmp(tokenizedLine[0], processes[a].id) == 0) && (strcmp(tokenizedLine[3], "printer") == 0)) {
+						strcpy(processes[a].state, "Blocked*");
+						strcpy(processes[a].queue, "printer");
+						if (strcmp(printer_q, "") == 0) {
+							strcpy(printer_q, tokenizedLine[0]);
+
+						}
+						else {
+							strcat(printer_q, " ");
+							strcat(printer_q, tokenizedLine[0]);
 						}
 					}
-				}
-			}
-			else if ((strcmp(tokenizedLine[2], "dispatched") == 0))				//Process is dispatched
-			{
-				fprintf(fp2, "%s %s ", tokenizedLine[0], tokenizedLine[2]);
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[0]) == 0)
-					{
-						strcpy(ProcessState[j + 1], "Running");
-						strcpy(PrintState[j + 1], "Running*");
-						break;
-					}
-				}
-			}
+					else if ((strcmp(tokenizedLine[0], processes[a].id) == 0) && (strcmp(tokenizedLine[3], "keyboard") == 0)) {
+						strcpy(processes[a].state, "Blocked*");
+						strcpy(processes[a].queue, "keyboard");
+						if (strcmp(kb_q, "") == 0) {
+							strcpy(kb_q, tokenizedLine[0]);
 
-			else if (strcmp(tokenizedLine[0], "Time") == 0)						//Process has timed off
-			{
-				fprintf(fp2, "%s %s ", tokenizedLine[3], tokenizedLine[4]);
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[3]) == 0)
-					{
-						strcpy(ProcessState[j + 1], "Ready");
-						strcpy(PrintState[j + 1], "Ready*");
-						break;
+						}
+						else {
+							strcat(kb_q, " ");
+							strcat(kb_q, tokenizedLine[0]);
+						}
 					}
 				}
+				blocked_count++;
+				//printf("Number of blocked processes is: %d\n", blocked_count);
 			}
-			else if (strcmp(tokenizedLine[3], "out") == 0)						//Process is swapped out
-			{
-				fprintf(fp2, "%s %s ", tokenizedLine[0], tokenizedLine[3]);
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[0]) == 0)
-					{
-						strcat(ProcessState[j + 1], " Suspend");
-						strcat(PrintState[j + 1], " Suspend*");
-						break;
+			else if (strcmp(tokenizedLine[2], "dispatched") == 0) {
+				for (int a = 0; a < n; a++) {
+					if (strcmp(tokenizedLine[0], processes[a].id) == 0) {
+						strcpy(processes[a].state, "Running*");
 					}
 				}
-			}
-			else if (strcmp(tokenizedLine[3], "in") == 0)						//Process is swapped in
-			{
-				fprintf(fp2, "%s %s ", tokenizedLine[0], tokenizedLine[3]);
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[0]) == 0)
-					{
+				if (strcmp(tokenizedLine[3], "disk") == 0) {
 
-						rch = strtok(ProcessState[j + 1], " ");
-						strcpy(PrintState[j + 1], ProcessState[j + 1]);
-						strcat(PrintState[j + 1], "*");
-						break;
+				}
+			}
+			/*
+			else if (strcmp(tokenizedLine[3], "out") == 0) {
+				//printf("%s", tokenizedLine[3]);
+				for (int a = 0; a < n; a++) {
+					if (strcmp(tokenizedLine[0], processes[a].id) == 0) {
+						strcat(processes[a].state, "/Suspend*");
+						//printf("%s \n", processes[a].state);
 					}
 				}
 			}
-			else if (strcmp(tokenizedLine[1], "interrupt") == 0)				//An interrupt has occured
-			{
-				fprintf(fp2, "%s %s ", tokenizedLine[4], tokenizedLine[1]);
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[4]) == 0)
-					{
-
-						for (int k = 0; k < 19; k++)
-						{
-							if (strcmp(ProcessState[j], DiskArr[k]) == 0)
-							{
-								for (; k < 19; k++)
-								{
-									strcpy(DiskArr[k], DiskArr[k + 1]);
-									strcpy(DiskArr[k + 1], "0");
+			*/
+			else if (strcmp(tokenizedLine[4], "expires") == 0) {
+				for (int a = 0; a < n; a++) {
+					if (strcmp(tokenizedLine[3], processes[a].id) == 0) {
+						strcpy(processes[a].state, "Ready*");
+					}
+				}
+			}
+			/*
+			else if (strcmp(tokenizedLine[3], "in") == 0) {
+				for (int a = 0; a < n; a++) {
+					if (strcmp(tokenizedLine[0], processes[a].id) == 0) {
+						if (strcmp(processes[a].state, "Blocked/Suspend") == 0) {
+							strcpy(processes[a].state, "Blocked*");
+						}
+						else if (strcmp(processes[a].state, "Ready/Suspend") == 0) {
+							strcpy(processes[a].state, "Ready*");
+						}
+					}
+				}
+			}
+			*/
+			else if (strcmp(tokenizedLine[2], "terminated") == 0) {
+				for (int a = 0; a < n; a++) {
+					if (strcmp(tokenizedLine[0], processes[a].id) == 0) {
+						strcpy(processes[a].state, "Exit*");
+					}
+				}
+			}
+			/// TODO: Interrupt
+			else if (strcmp(tokenizedLine[1], "interrupt") == 0) {
+				for (int a = 0; a < n; a++) {
+					if (strcmp(tokenizedLine[4], processes[a].id) == 0) {
+						if (strcmp(processes[a].state, "Blocked") == 0) {
+							strcpy(processes[a].state, "Ready*");
+							//printf("%s\n", processes[a].queue);
+							if (strcmp(processes[a].queue, "disk") == 0) {
+								if (strcmp(processes[a].id, disk_q) == 0) {
+									disk_q[0] = '\0';
+									continue;
 								}
-							}
-							if (strcmp(ProcessState[j], KeyboardArr[k]) == 0)
-							{
-								for (; k < 19; k++)
-								{
-									strcpy(KeyboardArr[k], KeyboardArr[k + 1]);
-									strcpy(KeyboardArr[k + 1], "0");
+								int k = 0;
+								parse_queue(disk_q);
+								while (strcmp(temp_arr[k], "") != 0) {
+									if (strcmp(temp_arr[k], processes[a].id) != 0) {
+										size_t temp_size = strlen(disk_q);
+										disk_q[temp_size - 3] = '\0';
+									}
+									k++;
 								}
 							}
-							if (strcmp(ProcessState[j], PrinterArr[k]) == 0)
-							{
-								for (; k < 19; k++)
-								{
-									strcpy(PrinterArr[k], PrinterArr[k + 1]);
-									strcpy(PrinterArr[k + 1], "0");
+							else if (strcmp(processes[a].queue, "printer") == 0) {
+								if (strcmp(processes[a].id, printer_q) == 0) {
+									printer_q[0] = '\0';
+									continue;
+								}
+								int k = 0;
+								parse_queue(printer_q);
+								while (strcmp(temp_arr[k], "") != 0) {
+									if (strcmp(temp_arr[k], processes[a].id) != 0) {
+										size_t temp_size = strlen(printer_q);
+										printer_q[temp_size - 3] = '\0';
+									}
+									k++;
+								}
+							}
+							else if (strcmp(processes[a].queue, "keyboard") == 0) {
+								//parse_queue(processes[a].id, kb_q);
+								if (strcmp(processes[a].id, kb_q) == 0) {
+									kb_q[0] = '\0';
+									continue;
+								}
+								int k = 0;
+								parse_queue(kb_q);
+								while (strcmp(temp_arr[k], "") != 0) {
+									if (strcmp(temp_arr[k], processes[a].id) != 0) {
+										size_t temp_size = strlen(kb_q);
+										kb_q[temp_size - 3] = '\0';
+									}
+									k++;
 								}
 							}
 						}
-						if (strcmp(ProcessState[j + 1], "Blocked") == 0)
-						{
-							strcpy(ProcessState[j + 1], "Ready");
-							strcpy(PrintState[j + 1], "Ready*");
+						else if (strcmp(processes[a].state, "Blocked/Suspend") == 0) {
+							strcpy(processes[a].state, "Ready/Suspend*");
+							if (strcmp(processes[a].queue, "disk") == 0) {
+								//parse_queue(processes[a].id, disk_q);
+								if (strcmp(processes[a].id, disk_q) == 0) {
+									disk_q[0] = '\0';
+									continue;
+								}
+								int k = 0;
+								parse_queue(disk_q);
+								while (strcmp(temp_arr[k], "") != 0) {
+									if (strcmp(temp_arr[k], processes[a].id) != 0) {
+										size_t temp_size = strlen(disk_q);
+										disk_q[temp_size - 3] = '\0';
+									}
+									k++;
+								}
+							}
+							else if (strcmp(processes[a].queue, "printer") == 0) {
+								//parse_queue(processes[a].id, printer_q);
+								if (strcmp(processes[a].id, printer_q) == 0) {
+									printer_q[0] = '\0';
+									continue;
+								}
+								int k = 0;
+								parse_queue(printer_q);
+								while (strcmp(temp_arr[k], "") != 0) {
+									if (strcmp(temp_arr[k], processes[a].id) != 0) {
+										size_t temp_size = strlen(printer_q);
+										printer_q[temp_size - 3] = '\0';
+									}
+									k++;
+								}
+							}
+							else if (strcmp(processes[a].queue, "keyboard") == 0) {
+								//parse_queue(processes[a].id, kb_q);
+								if (strcmp(processes[a].id, kb_q) == 0) {
+									kb_q[0] = '\0';
+									continue;
+								}
+								int k = 0;
+								parse_queue(kb_q);
+								while (strcmp(temp_arr[k], "") != 0) {
+									if (strcmp(temp_arr[k], processes[a].id) != 0) {
+										size_t temp_size = strlen(kb_q);
+										kb_q[temp_size - 3] = '\0';
+									}
+									k++;
+								}
+							}
 						}
-						else if (strcmp(ProcessState[j + 1], "Blocked Suspend") == 0)
-						{
-							strcpy(ProcessState[j + 1], "Ready Suspend");
-							strcpy(PrintState[j + 1], "Ready Suspend*");
-						}
+						//parse_queue(tokenizedLine[4], disk_q);
+					}
 
-					}
+				}
+				blocked_count--;
+				//printf("Number of blocked processes is: %d\n", blocked_count);
+			}
+		}
+
+		//print
+		for (int a = 0; a < n; a++) {
+			fprintf(fp2, "%s %s ", processes[a].id, processes[a].state);
+		}
+		//Run through process state array to remove the '*'
+		for (int a = 0; a < n; a++) {
+			size_t temp_size = strlen(processes[a].state);
+			if (processes[a].state[temp_size - 1] == '*') {
+				processes[a].state[temp_size - 1] = '\0';
+			}
+		}
+		fprintf(fp2, "\nDisk queue: %s\n", disk_q);
+		fprintf(fp2, "Printer queue: %s\n", printer_q);
+		fprintf(fp2, "Keyboard queue: %s\n", kb_q);
+
+		if (blocked_count >= user_process) {
+			fprintf(fp2, "\nNumber of Blocked process has reached the threshold\n");
+			fprintf(fp2, "List of Blocked: ");
+			for (int a = 0; a < n; a++) {
+				if (strcmp(processes[a].state, "Blocked") == 0) {
+					fprintf(fp2, "%s ", processes[a].id);
 				}
 			}
-			else																//Process has been terminated
-			{
-				fprintf(fp2, "%s %s ", tokenizedLine[0], tokenizedLine[2]);
-				for (int j = 0; j < sizeof(ProcessState) / 20; j++)
-				{
-					if (strcmp(ProcessState[j], tokenizedLine[0]) == 0)
-					{
-						strcpy(ProcessState[j + 1], "Exit");
-						strcpy(PrintState[j + 1], "Exit*");
-					}
+			fprintf(fp2, "\n");
+			//do the swap out
+			//get a random process
+			rand_process_swap = rand() % 20;
+			while (strcmp(processes[rand_process_swap].state, "Blocked") != 0) {
+				rand_process_swap = rand() % 20; //get new random process until process is blocked
+			}
+			strcpy(processes[rand_process_swap].state, "Blocked/Suspended*");
+			overall_latency++; //increase the latency
+
+			//do same thing
+			if (user_cap == 2) {
+				rand_process_swap = rand() % 20;
+				while (strcmp(processes[rand_process_swap].state, "Blocked") != 0) {
+					rand_process_swap = rand() % 20;
+				}
+				strcpy(processes[rand_process_swap].state, "Blocked/Suspended*");
+				overall_latency++; //increase the latency
+			}
+
+			for (int a = 0; a < n; a++) {
+				fprintf(fp2, "%s %s ", processes[a].id, processes[a].state);
+			}
+			//Run through process state array to remove the '*'
+			for (int a = 0; a < n; a++) {
+				size_t temp_size = strlen(processes[a].state);
+				if (processes[a].state[temp_size - 1] == '*') {
+					processes[a].state[temp_size - 1] = '\0';
 				}
 			}
-			for (int j = 0; j < 40; j++)
-			{
-				if (strcmp(ProcessState[j], "New") == 0)
-				{
-					strcpy(ProcessState[j], "Ready");
-					strcpy(PrintState[j], "Ready*");
-				}
-			}
+			fprintf(fp2, "\nDisk queue: %s\n", disk_q);
+			fprintf(fp2, "Printer queue: %s\n", printer_q);
+			fprintf(fp2, "Keyboard queue: %s\n", kb_q);
 
 		}
 		fprintf(fp2, "\n");
-
-
-		tempi = 0;
-		while (PrintState[tempi][1] != NULL && tempi < 40)
-		{
-			printf("%s ", PrintState[tempi]);
-			tempi++;
-		}
-		tempi = 0;
-		printf("\nDisk Queue : ");
-		while (strcmp(DiskArr[tempi], "0") != 0 && tempi < 20)
-		{
-			printf(" %s", DiskArr[tempi]);
-			tempi++;
-		}
-		printf("\nPrinter Queue : ");
-		tempi = 0;
-		while (strcmp(PrinterArr[tempi], "0") != 0 && tempi < 20)
-		{
-			printf("%s", PrinterArr[tempi]);
-			tempi++;
-		}
-		tempi = 0;
-		printf("\nKeyboard Queue : ");
-		while (strcmp(KeyboardArr[tempi], "0") != 0 && tempi < 20)
-		{
-			printf("%s", KeyboardArr[tempi]);
-			tempi++;
-		}
-		printf("\n\n");
 	}
 
+	//parse_queue(disk_q);
 	printf("Parsing complete\n\n");
-
 	fclose(fp1);
 	fclose(fp2);
 
