@@ -1,0 +1,158 @@
+P2 Running P4 Ready P5 Running P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked P20 Ready
+
+At time 3: Time slice for P2 expires; P4 is dispatched. 
+P2 Ready* P4 Running* P5 Running P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked P20 Ready 
+Total number of process: 10
+Number of blocked process: 5
+Process threshold: 10
+Disk queue: 
+Printer queue: 
+Keyboard queue: 
+
+At time 6: P4 requests the disk; P5 requests the printer. 
+P2 Ready P4 Blocked* P5 Blocked* P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked P20 Ready 
+Total number of process: 10
+Number of blocked process: 7
+Process threshold: 10
+Disk queue: P4
+Printer queue: P5
+Keyboard queue: 
+
+At time 8: P12 requests the disk. 
+P2 Ready P4 Blocked P5 Blocked P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Blocked* P16 Blocked P20 Ready 
+Total number of process: 10
+Number of blocked process: 8
+Process threshold: 10
+Disk queue: P4 P12
+Printer queue: P5
+Keyboard queue: 
+
+At time 12: P2 is dispatched; P20 is dispatched. 
+P2 Running* P4 Blocked P5 Blocked P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Blocked P16 Blocked P20 Running* 
+Total number of process: 10
+Number of blocked process: 8
+Process threshold: 10
+Disk queue: P4 P12
+Printer queue: P5
+Keyboard queue: 
+
+At time 17: P2 requests the printer; P20 requests the keyboard. 
+P2 Blocked* P4 Blocked P5 Blocked P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Blocked P16 Blocked P20 Blocked* 
+Total number of process: 10
+Number of blocked process: 10
+Process threshold: 10
+Disk queue: P4 P12
+Printer queue: P5 P2
+Keyboard queue: P20
+
+Number of Blocked process has reached the threshold
+List of Blocked: P2 P4 P5 P6 P9 P10 P11 P12 P16 P20 
+P2 Blocked P4 Blocked P5 Blocked P6 Blocked/Suspend* P9 Blocked P10 Blocked P11 Blocked P12 Blocked P16 Blocked/Suspend* P20 Blocked 
+Total number of process: 10
+Number of blocked process: 8
+Process threshold: 10
+Disk queue: P4 P12
+Printer queue: P5 P2
+Keyboard queue: P20
+
+At time 20: An interrupt occured for P12; An interrupt occured for P20. 
+P2 Blocked P4 Blocked P5 Blocked P6 Blocked/Suspend P9 Blocked P10 Blocked P11 Blocked P12 Ready* P16 Blocked/Suspend P20 Ready* 
+Total number of process: 10
+Number of blocked process: 6
+Process threshold: 10
+Disk queue: P4
+Printer queue: P5 P2
+Keyboard queue: 
+
+At time 22: An interrupt occured for P4.
+P2 Blocked P4 Ready* P5 Blocked P6 Blocked/Suspend P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked/Suspend P20 Ready 
+Total number of process: 10
+Number of blocked process: 5
+Process threshold: 10
+Disk queue: 
+Printer queue: P5 P2
+Keyboard queue: 
+
+At time 26: P4 is dispatched; P20 is dispatched. 
+P2 Blocked P4 Running* P5 Blocked P6 Blocked/Suspend P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked/Suspend P20 Running* 
+Total number of process: 10
+Number of blocked process: 5
+Process threshold: 10
+Disk queue: 
+Printer queue: P5 P2
+Keyboard queue: 
+
+At time 29: P20 is terminated. 
+P2 Blocked P4 Running P5 Blocked P6 Blocked* P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked* 
+Total number of process: 9
+Number of blocked process: 7
+Process threshold: 9
+Disk queue: 
+Printer queue: P5 P2
+Keyboard queue: 
+
+At time 37: P4 is terminated. 
+No suspended process
+P2 Blocked P5 Blocked P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 8
+Number of blocked process: 7
+Process threshold: 8
+Disk queue: 
+Printer queue: P5 P2
+Keyboard queue: 
+
+At time 40: An interrupt occured for P2. 
+P2 Ready* P5 Blocked P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 8
+Number of blocked process: 6
+Process threshold: 8
+Disk queue: 
+Printer queue: P5
+Keyboard queue: 
+
+At time 46: An interrupt occured for P5.
+P2 Ready P5 Ready* P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 8
+Number of blocked process: 5
+Process threshold: 8
+Disk queue: 
+Printer queue: 
+Keyboard queue: 
+
+At time 52: P2 is dispatched; P5 is dispatched.
+P2 Running* P5 Running* P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 8
+Number of blocked process: 5
+Process threshold: 8
+Disk queue: 
+Printer queue: 
+Keyboard queue: 
+
+At time 55: P2 requests the keyboard.
+P2 Blocked* P5 Running P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 8
+Number of blocked process: 6
+Process threshold: 8
+Disk queue: 
+Printer queue: 
+Keyboard queue: P2
+
+At time 58: P5 is terminated.
+No suspended process
+P2 Blocked P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 7
+Number of blocked process: 6
+Process threshold: 7
+Disk queue: 
+Printer queue: 
+Keyboard queue: P2
+
+At time 63: An interrupt occured for P4; An interrupt occured for P2.
+P2 Ready* P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked 
+Total number of process: 7
+Number of blocked process: 5
+Process threshold: 7
+Disk queue: 
+Printer queue: 
+Keyboard queue: 
+

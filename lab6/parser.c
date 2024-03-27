@@ -44,8 +44,8 @@ int main()
 
 	FILE* fp1;
 	FILE* fp2;
-	fp1 = fopen("inp1.txt", "r");			//open the original input file
-	fp2 = fopen("inp1_parsed.txt", "w");	//output the Process ID and event to another file. 
+	fp1 = fopen("inp2.txt", "r");			//open the original input file
+	fp2 = fopen("inp2_parsed.txt", "w");	//output the Process ID and event to another file. 
 	//You can store in variables instead of printing to file
 
 	srand(time(NULL));  // Random num seed
@@ -237,24 +237,59 @@ int main()
 			}
 			*/
 			else if (strcmp(tokenizedLine[2], "terminated") == 0) {
-				int index;
+				int exit_index = -1;
+				//fprintf(fp2, "Passed\n");
+				int swap_out_count = 0;
 				for (int a = 0; a < n; a++) {
 					if (strcmp(tokenizedLine[0], processes[a].id) == 0) {
 						strcpy(processes[a].state, "Exit*");
-						index = a;
+						exit_index = a;
 					}
 				}
-
-				n--;
-				user_process = n * user_threshold / 100;  //update the process threshold
-
-
-				rand_process_swap = rand() % 20;
-				while (strcmp(processes[rand_process_swap].state, "Blocked/Suspend") != 0) {
-					rand_process_swap = rand() % 20;
+				for (int a = 0; a < n; a++) {
+					if (strcmp(processes[a].state, "Blocked/Suspend") == 0) {
+						swap_out_count++;
+					}
 				}
-				strcpy(processes[rand_process_swap].state, "Blocked*");
-				overall_latency++;
+				//printf("%d\n", swap_out_count);
+				//update the process threshold and total no of process
+				if (exit_index != -1) {
+					//remove the exit 
+					for (int a = exit_index; a < n - 1; a++) {
+						processes[a] = processes[a + 1];
+					}
+
+					/*
+					printf("\n");
+					for (int z = 0; z < j / 2; z++) {
+						printf("Process %d: id = %s, state = %s\n", j, processes[z].id, processes[z].state);
+					}
+					printf("\n");*/
+					//exit_index = -1;
+				}
+				n--;
+				user_process = n * user_threshold / 100;
+				if (swap_out_count >= 1) {
+					rand_process_swap = rand() % 20; //get a random process
+					while (strcmp(processes[rand_process_swap].state, "Blocked/Suspend") != 0) {
+						rand_process_swap = rand() % 20; //get a new random process if process in not blocked/suspend
+					}
+					strcpy(processes[rand_process_swap].state, "Blocked*"); //change the state of the process
+					blocked_count++;
+					overall_latency++; //update overall latency
+				}
+				else { fprintf(fp2, "No suspended process\n"); break; }
+				if (user_cap == 2 && swap_out_count >= 2) {
+					rand_process_swap = rand() % 20; //get a random process
+					while (strcmp(processes[rand_process_swap].state, "Blocked/Suspend") != 0) {
+						rand_process_swap = rand() % 20; //get a new random process if process in not blocked/suspend
+					}
+					strcpy(processes[rand_process_swap].state, "Blocked*"); //change the state of the process
+					blocked_count++;
+					overall_latency++; //update overall latency
+				}
+				else  break; 
+				
 			}
 			/// TODO: Interrupt
 			else if (strcmp(tokenizedLine[1], "interrupt") == 0) {
@@ -262,6 +297,7 @@ int main()
 					if (strcmp(tokenizedLine[4], processes[a].id) == 0) {
 						if (strcmp(processes[a].state, "Blocked") == 0) {
 							strcpy(processes[a].state, "Ready*");
+							blocked_count--;
 							//printf("%s\n", processes[a].queue);
 							if (strcmp(processes[a].queue, "disk") == 0) {
 								if (strcmp(processes[a].id, disk_q) == 0) {
@@ -365,7 +401,7 @@ int main()
 					}
 
 				}
-				blocked_count--;
+				
 				//printf("Number of blocked processes is: %d\n", blocked_count);
 			}
 		}
@@ -387,6 +423,18 @@ int main()
 		fprintf(fp2, "Disk queue: %s\n", disk_q);
 		fprintf(fp2, "Printer queue: %s\n", printer_q);
 		fprintf(fp2, "Keyboard queue: %s\n", kb_q);
+		/*
+		int index;
+		for (int a = 0; a < n; a++) {
+			if (strcmp(processes[a].state, "Exit") == 0) {
+				index = a;
+			}
+		}
+		for (int a = index; a < n - 1; a++) {
+			processes[a] = processes[a + 1];
+		}
+		*/
+		
 
 		if (blocked_count >= user_process) {
 			fprintf(fp2, "\nNumber of Blocked process has reached the threshold\n");
@@ -403,7 +451,8 @@ int main()
 			while (strcmp(processes[rand_process_swap].state, "Blocked") != 0) {
 				rand_process_swap = rand() % 20; //get new random process until process is blocked
 			}
-			strcpy(processes[rand_process_swap].state, "Blocked/Suspended*");
+			strcpy(processes[rand_process_swap].state, "Blocked/Suspend*");
+			blocked_count--;
 			overall_latency++; //increase the latency
 
 			//do same thing
@@ -412,7 +461,8 @@ int main()
 				while (strcmp(processes[rand_process_swap].state, "Blocked") != 0) {
 					rand_process_swap = rand() % 20;
 				}
-				strcpy(processes[rand_process_swap].state, "Blocked/Suspended*");
+				strcpy(processes[rand_process_swap].state, "Blocked/Suspend*");
+				blocked_count--;
 				overall_latency++; //increase the latency
 			}
 

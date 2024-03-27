@@ -1,0 +1,17 @@
+P2 Running P4 Ready P5 Running P6 Blocked P9 Blocked P10 Blocked P11 Blocked P12 Ready P16 Blocked P20 Ready end
+At time 3: Time slice for P2 expires; P4 is dispatched. 
+At time 6: P4 requests the disk; P5 requests the printer. 
+At time 8: P12 requests the disk. 
+At time 12: P2 is dispatched; P20 is dispatched. 
+At time 17: P2 requests the printer; P20 requests the keyboard. 
+At time 20: An interrupt occured for P12; An interrupt occured for P20. 
+At time 22: An interrupt occured for P4.
+At time 26: P4 is dispatched; P20 is dispatched. 
+At time 29: P20 is terminated. 
+At time 37: P4 is terminated. 
+At time 40: An interrupt occured for P2. 
+At time 46: An interrupt occured for P5.
+At time 52: P2 is dispatched; P5 is dispatched.
+At time 55: P2 requests the keyboard.
+At time 58: P5 is terminated.
+At time 63: An interrupt occured for P4; An interrupt occured for P2.

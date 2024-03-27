@@ -26,5 +26,11 @@
     <Text Include="inp1_parsed.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="inp2.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="inp2_parsed.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
